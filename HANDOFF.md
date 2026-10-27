@@ -1,6 +1,6 @@
 # HANDOFF – Poilus d'Orient
 
-*V1 : 28/10/2026 (tag `v1`).*
+*V1 : 28/10/2026 (tag `v1`) · v2 : 28/10/2026 (tag `v2`, branche `main`).*
 
 ## Sources (hors dépôt – OneDrive de Tom)
 Racine : `C:\Users\tom\OneDrive\Documents\ATJ\ATJ GRAPHICS\PROJETS CLIENTS\2026\INOVA - Poilus d'Orient\` (chemin dans `work/config_poilus.json` > `base`)
@@ -33,7 +33,7 @@ Les rendus 3D ne suivent pas toujours les plans de vente (R+1/R+2 : pas de bloc 
 Canvas (images) + SVG (polygones, viewBox 2560×1440). Sélecteur d'étages (angle conservé). Info-bulle au survol, fiche au clic
 (plan de vente image + PDF, plan 3D, vues). Smartphone portrait : vue ×2,2 recadrée sur le bâtiment (`FOCUS`, centre des polygones par image).
 
-## Branche `ameliorations` (à valider par Tom)
+## v2 (28/10/2026, fusionnée dans `main`, tag `v2`)
 - **Liste des lots** (bouton « ☰ Lots ») : filtres par étage et « Disponibles », clic = bon étage + meilleur angle (image où le lot
   est le plus visible) + lot mis en évidence ; bouton « Fiche ».
 - **Statuts** : `statut` par lot dans `config_poilus.json` (`disponible` | `reserve` | `vendu`, défaut disponible — aucun statut réel
@@ -46,7 +46,7 @@ Canvas (images) + SVG (polygones, viewBox 2560×1440). Sélecteur d'étages (ang
 - **Visite guidée** : enchaîne les lots (étage, angle, info-bulle 3,8 s) — mode vitrine pour écran en espace de vente.
 
 ## Publication (GitHub Pages, dépôt public Doktom/poilus-dorient-maquette)
-Pages sert la branche `gh-pages` : racine = `docs/` de `main` (V1, tag `v1`), `/test/` = `docs/` de `ameliorations`.
-- V1 : https://doktom.github.io/poilus-dorient-maquette/
-- Branche de test : https://doktom.github.io/poilus-dorient-maquette/test/ (ex. `…/test/#lot-3`)
-Mise à jour : dans un clone de `gh-pages`, remplacer la racine (hors `test/`) par `git archive main docs`, ou `test/` par `git archive ameliorations docs`, commit, push.
+Pages sert la branche `gh-pages` = contenu de `docs/` de `main` (actuellement v2). La V1 reste récupérable par le tag `v1`.
+- Site : https://doktom.github.io/poilus-dorient-maquette/ (ex. `…/#lot-3`)
+- Pour tester une branche avant fusion : publier son `docs/` dans `gh-pages/test/` (`git archive <branche> docs`), lien `…/test/`.
+Mise à jour : dans un clone de `gh-pages`, remplacer le contenu par `git archive main docs`, commit, push.
