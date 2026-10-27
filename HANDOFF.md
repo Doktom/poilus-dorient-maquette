@@ -44,3 +44,9 @@ Canvas (images) + SVG (polygones, viewBox 2560×1440). Sélecteur d'étages (ang
   Bouton « Partager » (partage natif sur mobile, sinon copie du lien). Bouton plein écran (masqué si non supporté, ex. iPhone).
 - **Zoom dans la fiche** : molette, double-clic / double-appui, pincement, glisser, boutons + / −.
 - **Visite guidée** : enchaîne les lots (étage, angle, info-bulle 3,8 s) — mode vitrine pour écran en espace de vente.
+
+## Publication (GitHub Pages, dépôt public Doktom/poilus-dorient-maquette)
+Pages sert la branche `gh-pages` : racine = `docs/` de `main` (V1, tag `v1`), `/test/` = `docs/` de `ameliorations`.
+- V1 : https://doktom.github.io/poilus-dorient-maquette/
+- Branche de test : https://doktom.github.io/poilus-dorient-maquette/test/ (ex. `…/test/#lot-3`)
+Mise à jour : dans un clone de `gh-pages`, remplacer la racine (hors `test/`) par `git archive main docs`, ou `test/` par `git archive ameliorations docs`, commit, push.
