@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>__TITLE__ – Maquette 360°</title>
+<style>
+:root{--bg:#14171c;--panel:#fff;--ink:#1d232b;--mute:#6b7683;--line:#e4e8ed;
+ --T2:#2bb673;--T3:#2f80ed;--T4:#f2994a;--T5:#9b51e0;--acc:#1d232b}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink)}
+#stage{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#wrap{position:relative;aspect-ratio:2560/1440;width:min(100vw,calc(100vh*2560/1440));max-height:100vh}
+#wrap img,#wrap svg,#wrap canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#wrap img{object-fit:fill;user-select:none;-webkit-user-drag:none}
+#wrap canvas{user-select:none}
+#ui{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);aspect-ratio:2560/1440;width:min(100vw,calc(100vh*2560/1440));max-height:100vh;pointer-events:none}
+#ui>#ctl,#ui>#levels,#ui>#load{pointer-events:auto}
+#wrap{touch-action:pan-y;cursor:grab}#wrap.drag{cursor:grabbing}
+#ctl{position:absolute;left:14px;bottom:12px;display:flex;gap:8px}
+#ctl .btn{background:rgba(255,255,255,.94);box-shadow:0 4px 18px rgba(0,0,0,.18)}
+#levels{position:absolute;right:14px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;background:rgba(255,255,255,.94);border-radius:14px;padding:8px;box-shadow:0 4px 18px rgba(0,0,0,.18)}
+#levels small{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);text-align:center}
+#levels button{appearance:none;border:1px solid var(--line);background:#fff;border-radius:9px;min-width:62px;padding:7px 8px;font:700 13px system-ui;color:var(--ink);cursor:pointer;position:relative}
+#levels button:hover{background:#f3f5f8}
+#levels button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+#levels button .n{position:absolute;top:-6px;right:-6px;background:var(--T4);color:#fff;border-radius:9px;font-size:10px;padding:1px 5px;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+
+#load{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);background:rgba(255,255,255,.94);border-radius:10px;padding:6px 12px;font-weight:600;font-size:12px}
+.lot{fill-opacity:.32;stroke-width:3;stroke-linejoin:round;cursor:pointer;transition:fill-opacity .15s,stroke-width .15s;vector-effect:non-scaling-stroke;outline:none}
+.lot:hover,.lot:focus-visible,.lot.on{fill-opacity:.58;stroke-width:4.5}
+.lot{fill:var(--c,#f2994a);stroke:var(--c,#f2994a)}
+.lot.flash{animation:flash .9s ease 3}
+@keyframes flash{50%{fill-opacity:.85;stroke-width:8}}
+#fade{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;transition:opacity .45s ease}
+#topr{display:flex;gap:8px;align-items:flex-start}
+#legend .mode{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-left:4px}
+#legend .mode button{appearance:none;border:0;background:#fff;padding:3px 8px;font:600 11.5px system-ui;color:var(--mute);cursor:pointer}
+#legend .mode button.on{background:var(--acc);color:#fff}
+#bLots{appearance:none;border:0;font:700 13px system-ui;color:var(--ink);cursor:pointer;display:flex;gap:6px;align-items:center}
+/* liste des lots */
+#list{position:fixed;z-index:8;top:0;right:0;bottom:0;width:min(370px,92vw);background:#fff;box-shadow:-10px 0 40px rgba(0,0,0,.3);transform:translateX(105%);transition:transform .25s ease;display:flex;flex-direction:column}
+#list.open{transform:none}
+#list header{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line)}
+#list header h3{margin:0;font-size:16px;flex:1}
+#filters{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line)}
+#filters button{appearance:none;border:1px solid var(--line);background:#fff;border-radius:20px;padding:5px 11px;font:600 12.5px system-ui;color:var(--ink);cursor:pointer}
+#filters button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+#rows{overflow:auto;flex:1;padding:6px 8px 14px}
+.row-lot{display:grid;grid-template-columns:42px 1fr auto;gap:2px 10px;align-items:center;padding:10px 8px;border-radius:10px;cursor:pointer}
+.row-lot:hover,.row-lot:focus-visible{background:#f3f5f8;outline:none}
+.row-lot .num{grid-row:1/3;grid-column:1;width:42px;height:42px;border-radius:10px;color:#fff;font:800 17px system-ui;display:flex;align-items:center;justify-content:center}
+.row-lot b{font-size:14.5px}.row-lot small{color:var(--mute);font-size:12px}
+.row-lot .num{grid-column:1}.row-lot b,.row-lot small{grid-column:2}
+.row-lot .go{grid-column:3;grid-row:1/3;font:600 12px system-ui}
+.stat{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;border-radius:20px;padding:2px 8px;color:#fff}
+#rows .empty{color:var(--mute);text-align:center;padding:30px 10px}
+/* zoom des images de la fiche */
+.zoom{position:relative;overflow:hidden;touch-action:none;cursor:zoom-in}
+.zoom.z{cursor:grab}.zoom img{transform-origin:0 0}
+.zoom .zh{position:absolute;right:10px;bottom:10px;display:flex;gap:4px}
+.zoom .zh button{appearance:none;border:1px solid var(--line);background:rgba(255,255,255,.95);border-radius:8px;width:32px;height:32px;font:700 16px system-ui;cursor:pointer}
+.zoom .hint{position:absolute;left:10px;bottom:12px;font-size:11.5px;color:var(--mute);background:rgba(255,255,255,.9);border-radius:6px;padding:2px 7px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--acc);color:#fff;border-radius:10px;padding:9px 14px;font-weight:600;z-index:20;opacity:0;transition:.2s;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%)}
+#tour{position:absolute;left:50%;top:70px;transform:translateX(-50%);background:var(--acc);color:#fff;border-radius:20px;padding:6px 14px;font-weight:700;font-size:13px;display:none;pointer-events:auto;cursor:pointer}
+#tour.on{display:block}
+.lbs{display:none}
+.pin{pointer-events:none;font:800 38px system-ui;fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.6);stroke-width:9px;stroke-linejoin:round;text-anchor:middle}
+@media (max-width:700px){.pin{font-size:56px}}
+#svg:has(.lot.on) .lot:not(.on){fill-opacity:.12}
+/* en-tête + légende */
+#top{position:absolute;left:14px;top:12px;right:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;pointer-events:none}
+.chip{pointer-events:auto;background:rgba(255,255,255,.94);backdrop-filter:blur(6px);border-radius:12px;padding:8px 12px;box-shadow:0 4px 18px rgba(0,0,0,.18)}
+.chip b{display:block;font-size:15px}.chip small{color:var(--mute)}
+#legend{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+#legend span{display:inline-flex;align-items:center;gap:6px;font-weight:600}
+#legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+/* info-bulle */
+#tip{position:fixed;z-index:5;pointer-events:none;width:230px;background:var(--panel);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.35);overflow:hidden;opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s}
+#tip.show{opacity:1;transform:none}
+#tip.touch{pointer-events:auto;position:fixed;left:50%!important;top:auto!important;bottom:14px;transform:translateX(-50%);width:min(92vw,340px);cursor:pointer}
+.tip-h{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;color:#fff;font-weight:700}
+.tip-b{padding:9px 12px 10px}
+.tip-b .big{font-size:20px;font-weight:700}
+.tip-b .row{display:flex;justify-content:space-between;color:var(--mute);font-size:12.5px;margin-top:2px}
+.tip-b .row b{color:var(--ink)}
+.cta{margin-top:8px;font-size:12px;color:var(--mute);border-top:1px solid var(--line);padding-top:6px}
+/* fiche */
+#modal{position:fixed;inset:0;z-index:10;background:rgba(10,12,16,.66);display:none;align-items:center;justify-content:center;padding:2.5vh 2.5vw}
+#modal.open{display:flex}
+#card{background:var(--panel);width:min(1280px,100%);height:min(860px,100%);border-radius:16px;display:grid;grid-template-columns:minmax(0,1fr) 320px;grid-template-rows:auto minmax(0,1fr);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+#hd{grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
+#hd h2{margin:0;font-size:18px}
+.badge{color:#fff;font-weight:700;border-radius:8px;padding:3px 9px}
+#hd .sp{flex:1}
+.btn{appearance:none;border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 12px;font:600 13px inherit;color:var(--ink);cursor:pointer;text-decoration:none;display:inline-flex;gap:6px;align-items:center}
+.btn:hover{background:#f3f5f8}
+.btn.dark{background:var(--acc);color:#fff;border-color:var(--acc)}
+#main{display:flex;flex-direction:column;min-width:0;min-height:0}
+#tabs{display:flex;gap:4px;padding:10px 14px 0;border-bottom:1px solid var(--line)}
+#tabs button{appearance:none;border:0;background:none;padding:9px 12px;font:600 13px inherit;color:var(--mute);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}
+#tabs button.on{color:var(--ink);border-color:var(--ink)}
+#view{flex:1;min-height:0;position:relative;background:#f4f6f8;display:flex;flex-direction:column}
+#view iframe{flex:1;border:0;width:100%}
+#view .pic{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:10px}
+#view .pic img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px}
+#thumbs{display:flex;gap:8px;padding:8px 10px;overflow-x:auto;background:#fff;border-top:1px solid var(--line)}
+#thumbs img{height:64px;width:auto;border-radius:6px;cursor:pointer;opacity:.6;border:2px solid transparent}
+#thumbs img.on{opacity:1;border-color:var(--ink)}
+#side{border-left:1px solid var(--line);overflow:auto;padding:14px 16px;min-height:0}
+#side h3{margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+#side table{width:100%;border-collapse:collapse;margin-bottom:16px}
+#side td{padding:5px 0;border-bottom:1px solid var(--line)}
+#side td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+#side tr.tot td{font-weight:700;font-size:15px;border-bottom:2px solid var(--ink)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.kpi{background:#f4f6f8;border-radius:10px;padding:8px 10px}.kpi small{color:var(--mute);display:block}.kpi b{font-size:17px}
+.note{color:var(--mute);font-size:11.5px}
+/* smartphone / tablette en portrait : vue agrandie qui suit le batiment, commandes hors de l'image */
+@media (max-aspect-ratio:1/1){
+ html,body,#stage{background:#f6f4f9}
+ #stage{display:block}
+ #wrap{position:absolute;left:0;top:50%;width:auto;height:min(62vh,calc(220vw*1440/2560));max-height:none;transform:translateY(-50%);transition:transform .12s linear}
+ #ui{inset:0;left:0;top:0;transform:none;width:auto;aspect-ratio:auto;max-height:none}
+ #top{left:10px;right:10px;top:max(10px,env(safe-area-inset-top));flex-direction:row;gap:8px}
+ .chip{padding:7px 10px;box-shadow:0 2px 10px rgba(0,0,0,.12)}.chip b{font-size:14px}.chip small{font-size:11.5px}
+ #legend{flex-shrink:0}
+ #levels{top:auto;right:auto;left:50%;bottom:calc(66px + env(safe-area-inset-bottom));transform:translateX(-50%);flex-direction:row;padding:6px;gap:5px}
+ #levels small{display:none}
+ #levels button{min-width:46px;padding:9px 6px;font-size:13px}
+ #ctl{left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom));width:max-content}
+ #ctl .btn,#levels{white-space:nowrap}
+ #levels{width:max-content}
+ #ctl .btn{padding:10px 12px}
+ #ctl .lbl{display:none}#ctl .lbs{display:inline}
+ #topr{flex-direction:column;align-items:flex-end}
+ #legend .mode button{padding:5px 8px}
+ #list{top:auto;left:0;right:0;width:auto;height:72vh;border-radius:16px 16px 0 0;transform:translateY(105%)}
+ #tour{top:auto;bottom:calc(126px + env(safe-area-inset-bottom))}
+ #load{bottom:auto;top:calc(50% + min(31vh,calc(110vw*1440/2560)) + 4px)}
+}
+/* telephone en paysage : commandes compactes */
+@media (max-height:500px) and (min-aspect-ratio:1/1){
+ .chip{padding:5px 9px}.chip b{font-size:13px}.chip small{font-size:11px}
+ #levels{padding:5px;gap:4px}#levels small{display:none}
+ #levels button{min-width:44px;padding:6px 6px;font-size:12px}
+ #ctl .btn{padding:5px 10px;font-size:12px}
+ #top{top:8px;left:8px;right:8px}#ctl{left:8px;bottom:8px}
+}
+@media (max-width:860px){
+ #card{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr) auto;height:100%}
+ #side{border-left:0;border-top:1px solid var(--line);max-height:38vh}
+}
+@media (max-width:860px){#modal{padding:0}#card{border-radius:0}#hd{flex-wrap:wrap;gap:8px}#hd .sp{display:none}#hd h2{font-size:16px;flex:1}#m-dl{order:5;width:100%;justify-content:center}#tabs{overflow-x:auto}#thumbs img{height:52px}}
+@media (max-height:500px) and (min-aspect-ratio:1/1){
+ html,body,#stage{background:#f6f4f9}
+ #card{grid-template-columns:minmax(0,1fr) 250px;grid-template-rows:auto minmax(0,1fr);height:100%}
+ #side{border-left:1px solid var(--line);border-top:0;max-height:none;padding:10px 12px}
+ #hd{flex-wrap:nowrap;padding:6px 10px}#hd h2{font-size:14px}#m-dl{order:0;width:auto;padding:5px 9px;font-size:12px}#m-close{padding:5px 9px}
+ #tabs{padding:2px 8px 0}#tabs button{padding:6px 10px}
+ #view .pic{padding:4px}#thumbs{padding:4px 8px}#thumbs img{height:40px}
+ .kpis{gap:6px;margin-bottom:10px}.kpi{padding:6px 8px}.kpi b{font-size:15px}
+}
+</style>
+</head>
+<body>
+<div id="stage">
+ <div id="wrap">
+  <canvas id="frame" width="1920" height="1080" role="img" aria-label="Maquette 360°"></canvas>
+  <svg id="svg" viewBox="0 0 2560 1440" preserveAspectRatio="none"></svg>
+ </div>
+ <div id="ui">
+  <div id="top">
+   <div class="chip"><b id="h-title"></b><small id="h-sub"></small></div>
+   <div id="topr"><div class="chip" id="legend"></div><button class="chip" id="bLots" aria-haspopup="dialog">☰ Lots <span id="nl"></span></button></div>
+  </div>
+  <div id="tour" role="status">Visite guidée · toucher pour arrêter</div>
+  <div id="ctl"><button class="btn" id="prev" aria-label="Tourner à gauche">◀</button><button class="btn" id="next" aria-label="Tourner à droite">▶</button><button class="btn" id="auto" aria-label="Rotation auto">⟳<span class="lbl"> Rotation auto</span></button><button class="btn" id="bTour" aria-label="Visite guidée">▶<span class="lbl"> Visite guidée</span><span class="lbs"> Visite</span></button><button class="btn" id="bFull" aria-label="Plein écran" title="Plein écran">⛶</button></div>
+  <div id="levels" role="group" aria-label="Choix de l'étage"><small>Étages</small></div>
+  <div id="load">Chargement des vues…</div>
+ </div>
+</div>
+<div id="tip" role="tooltip"></div>
+<aside id="list" aria-hidden="true" aria-label="Liste des lots"><header><h3>Les lots</h3><button class="btn" id="l-close" aria-label="Fermer">✕</button></header><div id="filters"></div><div id="rows"></div></aside>
+<div id="toast" role="status"></div>
+<div id="modal" aria-hidden="true">
+ <div id="card" role="dialog" aria-modal="true">
+  <div id="hd"><span class="badge" id="m-badge"></span><h2 id="m-title"></h2><span class="sp"></span>
+   <button class="btn" id="m-share">🔗 Partager</button>
+   <a class="btn" id="m-dl" download target="_blank" rel="noopener">⬇ Plan de vente (PDF)</a>
+   <button class="btn dark" id="m-close" aria-label="Fermer">✕ Fermer</button></div>
+  <div id="main"><div id="tabs"></div><div id="view"></div></div>
+  <aside id="side"></aside>
+ </div>
+</div>
+<script>
+const A=p=>(window.ASSET&&window.ASSET[p])||p;
+const LOTS=__LOTS__;
+const PROG=__PROG__;
+const LEVELS=__LEVELS__;const NF=LEVELS[0].n;const FOCUS=__FOCUS__;
+const portrait=matchMedia("(max-aspect-ratio:1/1)");const coarse=matchMedia("(pointer:coarse)").matches;
+let LV=LEVELS.find(l=>l.id===PROG.start)||LEVELS[0];
+let FRAMES=LV.polys;
+const COLORS={"T2":"#2bb673","T3":"#2f80ed","T4":"#f2994a","T4/T5":"#9b51e0"};
+const STAT={disponible:["Disponible","#2bb673"],reserve:["Réservé","#f2994a"],vendu:["Vendu","#8a94a0"]};
+const st=l=>STAT[l.statut]||STAT.disponible;
+const statChip=l=>`<span class="stat" style="background:${st(l)[1]}">${st(l)[0]}</span>`;
+let MODE="typo";
+const colorOf=n=>MODE==="statut"?st(LOTS[n])[1]:COLORS[LOTS[n].typo];
+const levelOf=n=>LEVELS.find(L=>L.polys&&L.polys[0][n]);
+const NS="http://www.w3.org/2000/svg";
+const svg=document.getElementById("svg"),tip=document.getElementById("tip");
+const $=s=>document.querySelector(s);
+const annex=l=>{const i=l.table.findIndex(r=>r[0]==="TOTAL");return i<0?[]:l.table.slice(i+1)};
+const rooms=l=>{const i=l.table.findIndex(r=>r[0]==="TOTAL");return i<0?l.table:l.table.slice(0,i)};
+const total=l=>(l.table.find(r=>r[0]==="TOTAL")||[,"–"])[1];
+
+/* légende */
+function legend(){
+  const items=MODE==="statut"?[...new Set(Object.values(LOTS).map(l=>l.statut||"disponible"))].map(s=>[STAT[s][0],STAT[s][1]])
+    :[...new Set(Object.values(LOTS).map(l=>l.typo))].map(t=>[t,COLORS[t]]);
+  $("#legend").innerHTML=items.map(([k,c])=>`<span><i style="background:${c}"></i>${k}</span>`).join("")+
+    `<span class="mode" role="group" aria-label="Couleurs"><button data-m="typo" class="${MODE==="typo"?"on":""}">Typo</button><button data-m="statut" class="${MODE==="statut"?"on":""}">Statut</button></span>`;
+  $("#legend").querySelectorAll(".mode button").forEach(b=>b.onclick=()=>{MODE=b.dataset.m;legend();recolor()});
+}
+function recolor(){for(const n in polyEl)polyEl[n].style.setProperty("--c",colorOf(n))}
+legend();
+
+/* polygones */
+let polyEl={},pinEl={};
+function buildPolys(){
+svg.innerHTML="";polyEl={};pinEl={};
+if(!FRAMES)return;
+for(const n of Object.keys(FRAMES[0])){
+  const l=LOTS[n];
+  const p=document.createElementNS(NS,"polygon");
+  p.setAttribute("class","lot");p.setAttribute("data-t",l.typo);p.setAttribute("data-n",n);
+  p.setAttribute("tabindex","0");p.setAttribute("role","button");
+  p.setAttribute("aria-label",`Appartement ${n}, ${l.typo}, ${total(l)} m²`);
+  p.style.setProperty("--c",colorOf(n));
+  svg.appendChild(p);polyEl[n]=p;
+  const t=document.createElementNS(NS,"text");t.setAttribute("class","pin");t.textContent=n;svg.appendChild(t);pinEl[n]=t;
+  p.addEventListener("pointerenter",e=>{if(e.pointerType!=="touch"&&!dragging)showTip(n,e)});
+  p.addEventListener("pointermove",e=>{if(e.pointerType!=="touch"&&!dragging)moveTip(e)});
+  p.addEventListener("pointerleave",e=>{if(e.pointerType!=="touch")hideTip()});
+  p.addEventListener("focus",()=>{const r=p.getBoundingClientRect();showTip(n,{clientX:r.left+r.width/2,clientY:r.top+r.height/2})});
+  p.addEventListener("blur",hideTip);
+  p.addEventListener("click",e=>{
+    if(moved>6)return;
+    if(e.pointerType==="touch"||matchMedia("(pointer:coarse)").matches){
+      if(tip.dataset.n!==n||!tip.classList.contains("show")){showTip(n,e,true);return}
+    }
+    openLot(n)});
+  p.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();openLot(n)}});
+}}
+buildPolys();
+function centroid(pts){let a=0,cx=0,cy=0;for(let i=0;i<pts.length;i++){const[x0,y0]=pts[i],[x1,y1]=pts[(i+1)%pts.length];const c=x0*y1-x1*y0;a+=c;cx+=(x0+x1)*c;cy+=(y0+y1)*c}a/=2;return[cx/(6*a),cy/(6*a)]}
+/* rotation */
+const cv=$("#frame"),ctx=cv.getContext("2d"),wrap=$("#wrap");const bm=[];
+let cur_f=0,dragging=false,moved=0,autoT=null;
+/* images : niveau affiché d'abord, puis les autres en arrière-plan */
+const IMG={},BM={};
+function loadLevel(L,onDone){
+  if(IMG[L.id]){onDone&&onDone();return}
+  IMG[L.id]=[];BM[L.id]=[];let k=0;
+  IMG[L.id].length=NF;
+  const order=[...Array(NF).keys()].sort((a,b)=>{const d=x=>Math.min((x-cur_f+NF)%NF,(cur_f-x+NF)%NF);return d(a)-d(b)});
+  for(const i of order){const im=new Image();
+    im.onload=im.onerror=()=>{
+      if(im.naturalWidth)createImageBitmap(im).then(b=>{BM[L.id][i]=b;if(L===LV&&i===cur_f)draw()}).catch(()=>{if(L===LV&&i===cur_f)draw()});
+      k++;if(L===LV)progress(k);if(k>=NF&&onDone)onDone()};
+    im.decoding="async";im.src=A(`frames/${L.id}_${String(i).padStart(2,"0")}.${PROG.ext}`);IMG[L.id][i]=im}
+}
+function progress(k){const el=$("#load");if(!el)return;if(k>=NF){el.style.display="none"}else{el.style.display="";el.textContent=`Chargement des vues… ${k}/${NF}`}}
+function draw(){const c=IMG[LV.id]||[],b=BM[LV.id]||[];const s=b[cur_f]||(c[cur_f]&&c[cur_f].naturalWidth?c[cur_f]:null);if(s){ctx.drawImage(s,0,0,cv.width,cv.height);return true}return false}
+function loadAll(){const rest=LEVELS.filter(l=>!IMG[l.id]);if(rest.length)loadLevel(rest[0],loadAll)}
+function pan(){
+  const wrap=$("#wrap");
+  if(!portrait.matches){wrap.style.transform="";return}
+  const W=wrap.offsetWidth,vw=$("#stage").clientWidth;
+  let x=vw/2-FOCUS[cur_f]/2560*W;x=Math.min(0,Math.max(vw-W,x));
+  wrap.style.transform=`translate(${x.toFixed(1)}px,-50%)`;
+}
+addEventListener("resize",()=>pan());
+$("#stage").addEventListener("scroll",e=>{e.target.scrollLeft=0;e.target.scrollTop=0});   /* jamais de defilement du cadre (focus, scrollIntoView) */
+function setFrame(f){
+  cur_f=((Math.round(f)%NF)+NF)%NF;
+  draw();pan();
+  if(!FRAMES)return;
+  const F=FRAMES[cur_f];
+  for(const n in F){
+    polyEl[n].setAttribute("points",F[n].map(q=>q.map(v=>v.toFixed(1)).join(",")).join(" "));
+    const c=centroid(F[n]);pinEl[n].setAttribute("x",c[0]);pinEl[n].setAttribute("y",c[1]+13);
+  }
+}
+/* étages */
+const nLots=L=>L.polys?Object.keys(L.polys[0]).length:0;
+function header(){$("#h-title").textContent=`${PROG.name} · ${LV.nom}`;
+  $("#h-sub").textContent=nLots(LV)?(coarse?"Glissez pour tourner · touchez un appartement":"Glissez pour tourner · survolez un appartement"):"Glissez pour tourner · pas d'appartement à cet étage";
+  $("#legend").style.display=nLots(LV)?"":"none"}
+function crossfade(){
+  try{const c=document.createElement("canvas");c.id="fade";c.width=cv.width;c.height=cv.height;c.getContext("2d").drawImage(cv,0,0);
+    $("#fade")&&$("#fade").remove();wrap.insertBefore(c,svg);requestAnimationFrame(()=>requestAnimationFrame(()=>{c.style.opacity=0}));setTimeout(()=>c.remove(),600)}catch(e){}
+}
+function setLevel(L,quiet){
+  if(L===LV)return;crossfade();LV=L;FRAMES=L.polys;hideTip();buildPolys();
+  if(!quiet)setHash(`etage-${L.id}`);
+  document.querySelectorAll("#levels button").forEach(b=>{b.classList.toggle("on",b.dataset.id===L.id);b.setAttribute("aria-pressed",b.dataset.id===L.id)});
+  header();const k=(IMG[L.id]||[]).filter(i=>i.complete).length;progress(IMG[L.id]?k:0);
+  loadLevel(L);setFrame(cur_f);
+}
+for(const L of [...LEVELS].reverse()){const b=document.createElement("button");b.dataset.id=L.id;b.title=L.nom;
+  b.innerHTML=L.label+(nLots(L)?`<span class="n">${nLots(L)}</span>`:"");b.className=L===LV?"on":"";b.setAttribute("aria-pressed",L===LV);
+  b.onclick=()=>{stopAll();setLevel(L)};$("#levels").appendChild(b)}
+header();
+loadLevel(LV,loadAll);
+setFrame(0);
+let sx=0,sf=0,fpos=0,vel=0,lastX=0,lastT=0,inert=null;
+const pxPerFrame=()=>Math.min(wrap.clientWidth,$("#stage").clientWidth)/NF*1.6;
+function stopInertia(){if(inert){cancelAnimationFrame(inert);inert=null}}
+wrap.addEventListener("pointerdown",e=>{dragging=true;moved=0;sx=lastX=e.clientX;lastT=performance.now();sf=fpos=cur_f;vel=0;stopInertia();stopAll();hideTip()});
+window.addEventListener("pointermove",e=>{if(!dragging)return;const dx=e.clientX-sx;moved=Math.max(moved,Math.abs(dx));
+  const now=performance.now(),dt=Math.max(1,now-lastT);vel=0.75*vel+0.25*(-(e.clientX-lastX)/pxPerFrame()/dt);lastX=e.clientX;lastT=now;
+  if(moved>6){wrap.classList.add("drag");hideTip();fpos=sf-dx/pxPerFrame();setFrame(fpos)}});
+window.addEventListener("pointerup",()=>{if(!dragging)return;dragging=false;wrap.classList.remove("drag");setTimeout(()=>moved=0,0);
+  /* inertie : la rotation continue puis ralentit */
+  if(moved>6&&Math.abs(vel)>0.004&&performance.now()-lastT<80){let v=Math.max(-0.03,Math.min(0.03,vel)),t0=performance.now();   /* vitesse plafonnee : ~6 images d'elan au plus */
+    const step=now=>{const dt=now-t0;t0=now;fpos+=v*dt;v*=Math.pow(0.995,dt);setFrame(fpos);if(Math.abs(v)>0.0015)inert=requestAnimationFrame(step);else inert=null};
+    inert=requestAnimationFrame(step)}});
+document.addEventListener("keydown",e=>{if($("#modal").classList.contains("open"))return;
+  if(e.key==="ArrowUp"||e.key==="ArrowDown"){const i=LEVELS.indexOf(LV)+(e.key==="ArrowUp"?1:-1);if(LEVELS[i]){e.preventDefault();stopAll();setLevel(LEVELS[i])}}
+  if(e.key==="ArrowLeft"){stopAll();hideTip();setFrame(cur_f-1)}if(e.key==="ArrowRight"){stopAll();hideTip();setFrame(cur_f+1)}});
+$("#prev").onclick=()=>{stopAll();hideTip();setFrame(cur_f-1)};
+$("#next").onclick=()=>{stopAll();hideTip();setFrame(cur_f+1)};
+function stopAuto(){if(autoT){clearInterval(autoT);autoT=null;$("#auto").innerHTML='⟳<span class="lbl"> Rotation auto</span>'}}
+function stopAll(){stopAuto();stopTour();stopInertia()}
+$("#auto").onclick=()=>{if(autoT){stopAuto();return}stopTour();hideTip();$("#auto").innerHTML='⏸<span class="lbl"> Pause</span>';autoT=setInterval(()=>setFrame(cur_f+1),130)};
+function showTip(n,e,touch){
+  const l=LOTS[n],a=annex(l);
+  document.querySelectorAll(".lot.on").forEach(x=>x.classList.remove("on"));
+  document.querySelector(`.lot[data-n="${n}"]`).classList.add("on");
+  tip.dataset.n=n;
+  tip.innerHTML=`<div class="tip-h" style="background:${colorOf(n)}"><span>Appartement ${n}</span><span>${l.typo}</span></div>
+  <div class="tip-b"><div class="big">${total(l)} m²</div>
+  <div class="row"><span>Étage</span><b>${l.etage}</b></div>
+  <div class="row"><span>Statut</span>${statChip(l)}</div>
+  ${a.map(r=>`<div class="row"><span>${r[0]}</span><b>${r[1]} m²</b></div>`).join("")}
+  <div class="cta">${touch?"Toucher pour ouvrir la fiche":"Cliquer pour la fiche complète"} →</div></div>`;
+  tip.classList.toggle("touch",!!touch);tip.classList.add("show");
+  tip.onclick=touch?()=>{hideTip();openLot(n)}:null;
+  if(!touch)moveTip(e);
+}
+function moveTip(e){
+  const w=tip.offsetWidth,h=tip.offsetHeight;
+  let x=e.clientX+18,y=e.clientY+18;
+  if(x+w>innerWidth-8)x=e.clientX-w-18;
+  if(y+h>innerHeight-8)y=innerHeight-h-8;
+  tip.style.left=x+"px";tip.style.top=Math.max(8,y)+"px";
+}
+function hideTip(){tip.classList.remove("show");document.querySelectorAll(".lot.on").forEach(x=>x.classList.remove("on"))}
+document.addEventListener("pointerdown",e=>{if(e.pointerType==="touch"&&!e.target.closest(".lot,#tip"))hideTip()});
+
+/* fiche complète */
+let cur=null,tab="pdf",vIdx=0;
+function openLot(n,quietHash){
+  hideTip();cur=LOTS[n];cur.n=n;tab="pdf";vIdx=0;
+  const m=$("#modal");
+  $("#m-badge").textContent=cur.typo;$("#m-badge").style.background=COLORS[cur.typo];
+  $("#m-title").textContent=`Appartement ${n} · ${cur.etage}`;
+  $("#m-dl").href=A(`pdf/lot-${String(n).padStart(2,"0")}.pdf`);$("#m-dl").setAttribute("download",`plan-de-vente-lot-${String(n).padStart(2,"0")}.pdf`);
+  const a=annex(cur);
+  $("#side").innerHTML=`<div class="kpis"><div class="kpi"><small>Surface habitable</small><b>${total(cur)} m²</b></div><div class="kpi"><small>Typologie</small><b>${cur.typo}</b></div><div class="kpi"><small>Statut</small><b>${statChip(cur)}</b></div>${cur.utile?`<div class="kpi"><small>Surface utile</small><b>${cur.utile} m²</b></div>`:""}</div>
+   <h3>Surfaces habitables</h3><table>${rooms(cur).map(r=>`<tr><td>${r[0]}</td><td>${r[1]} m²</td></tr>`).join("")}<tr class="tot"><td>Total</td><td>${total(cur)} m²</td></tr></table>
+   ${a.length?`<h3>Extérieurs</h3><table>${a.map(r=>`<tr><td>${r[0]}</td><td>${r[1]} m²</td></tr>`).join("")}</table>`:""}
+   <p class="note">Surfaces approximatives, plans non contractuels. Mobilier indicatif.</p>`;
+  renderTabs();m.classList.add("open");m.setAttribute("aria-hidden","false");$("#m-close").focus();
+  if(!quietHash)setHash(`lot-${n}`);
+}
+const plan3d=l=>l.views.find(v=>/plan/i.test(v.label));
+const inter=l=>l.views.filter(v=>!/plan/i.test(v.label));
+function renderTabs(){
+  const t=[["pdf","Plan de vente"]];if(plan3d(cur))t.push(["3d","Plan 3D"]);if(inter(cur).length)t.push(["int","Vues intérieures"]);
+  $("#tabs").innerHTML=t.map(([k,l])=>`<button class="${k===tab?"on":""}" data-k="${k}">${l}</button>`).join("");
+  $("#tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{tab=b.dataset.k;vIdx=0;renderTabs()});
+  const v=$("#view");
+  if(tab==="pdf")v.innerHTML=`<div class="pic zoom"><img src="${A(`img/plan-lot${String(cur.n).padStart(2,"0")}.jpg`)}" alt="Plan de vente"></div>`;
+  else if(tab==="3d")v.innerHTML=`<div class="pic zoom"><img src="${A(plan3d(cur).file)}" alt="Plan 3D"></div>`;
+  else{const L=inter(cur);
+    v.innerHTML=`<div class="pic zoom"><img id="big" src="${A(L[vIdx].file)}" alt="${L[vIdx].label}"></div><div id="thumbs">${L.map((x,i)=>`<img src="${A(x.file)}" alt="${x.label}" title="${x.label}" class="${i===vIdx?"on":""}" data-i="${i}">`).join("")}</div>`;
+    v.querySelectorAll("#thumbs img").forEach(im=>im.onclick=()=>{vIdx=+im.dataset.i;renderTabs()});}
+  v.querySelectorAll(".zoom").forEach(zoomable);
+}
+function closeLot(){if(!$("#modal").classList.contains("open"))return;setHash(`etage-${LV.id}`);$("#modal").classList.remove("open");$("#modal").setAttribute("aria-hidden","true");$("#view").innerHTML=""}
+$("#m-close").onclick=closeLot;
+$("#modal").addEventListener("click",e=>{if(e.target.id==="modal")closeLot()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeLot();closeList()}});
+
+/* zoom des images de la fiche (molette, double-clic / double-appui, pincement, glisser) */
+function zoomable(box){
+  const img=box.querySelector("img");let s=1,x=0,y=0;const P=new Map();let pinch=null,last=null,tapT=0;
+  box.insertAdjacentHTML("beforeend",`<div class="hint">${coarse?"Pincer ou toucher 2× pour zoomer":"Molette ou double-clic pour zoomer"}</div><div class="zh"><button data-z="1" aria-label="Zoomer">+</button><button data-z="-1" aria-label="Dézoomer">−</button></div>`);
+  /* x, y : decalage de l'image (px) ; on garde l'image dans le cadre */
+  const clamp=()=>{const r=box.getBoundingClientRect(),iw=img.offsetWidth*s,ih=img.offsetHeight*s,ox=img.offsetLeft,oy=img.offsetTop;
+    if(s<=1.001){s=1;x=0;y=0;return}
+    x=iw<=r.width?(r.width-iw)/2-ox:Math.min(-ox,Math.max(r.width-ox-iw,x));
+    y=ih<=r.height?(r.height-ih)/2-oy:Math.min(-oy,Math.max(r.height-oy-ih,y))};
+  const apply=()=>{clamp();img.style.transform=`translate(${x}px,${y}px) scale(${s})`;box.classList.toggle("z",s>1)};
+  const zoomAt=(cx,cy,ns)=>{ns=Math.min(6,Math.max(1,ns));const b=box.getBoundingClientRect();
+    const px=cx-b.left-img.offsetLeft,py=cy-b.top-img.offsetTop;   /* point vise, repere de l'image non transformee */
+    x=px-(px-x)*ns/s;y=py-(py-y)*ns/s;s=ns;apply()};
+  box.addEventListener("wheel",e=>{e.preventDefault();zoomAt(e.clientX,e.clientY,s*Math.exp(-e.deltaY*0.0015))},{passive:false});
+  box.addEventListener("dblclick",e=>{if(!e.target.closest(".zh"))zoomAt(e.clientX,e.clientY,s>1?1:2.5)});
+  box.querySelectorAll(".zh button").forEach(b=>b.onclick=e=>{e.stopPropagation();const r=box.getBoundingClientRect();zoomAt(r.left+r.width/2,r.top+r.height/2,s*(b.dataset.z>0?1.6:1/1.6))});
+  box.addEventListener("pointerdown",e=>{if(e.target.closest(".zh"))return;try{box.setPointerCapture(e.pointerId)}catch(_){}P.set(e.pointerId,[e.clientX,e.clientY]);
+    if(P.size===2){const[a,b]=[...P.values()];pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1])||1,s}}else{last=[e.clientX,e.clientY];
+      if(e.pointerType==="touch"){const n=performance.now();if(n-tapT<300)zoomAt(e.clientX,e.clientY,s>1?1:2.5);tapT=n}}});
+  box.addEventListener("pointermove",e=>{if(!P.has(e.pointerId))return;P.set(e.pointerId,[e.clientX,e.clientY]);
+    if(P.size===2&&pinch){const[a,b]=[...P.values()];zoomAt((a[0]+b[0])/2,(a[1]+b[1])/2,pinch.s*Math.hypot(a[0]-b[0],a[1]-b[1])/pinch.d)}
+    else if(last&&s>1){x+=e.clientX-last[0];y+=e.clientY-last[1];last=[e.clientX,e.clientY];apply()}});
+  const up=e=>{P.delete(e.pointerId);if(P.size<2)pinch=null;if(!P.size)last=null};
+  box.addEventListener("pointerup",up);box.addEventListener("pointercancel",up);
+  img.addEventListener("load",apply);
+}
+
+/* liste des lots */
+const LOTN=Object.keys(LOTS).filter(n=>levelOf(n)).sort((a,b)=>a-b);
+$("#nl").textContent=`(${LOTN.length})`;
+let fLevel="all",fDispo=false;
+function renderList(){
+  const lv=[...new Set(LOTN.map(n=>levelOf(n).id))];
+  $("#filters").innerHTML=`<button data-l="all" class="${fLevel==="all"?"on":""}">Tous</button>`+
+    LEVELS.filter(L=>lv.includes(L.id)).map(L=>`<button data-l="${L.id}" class="${fLevel===L.id?"on":""}">${L.label}</button>`).join("")+
+    `<button data-d="1" class="${fDispo?"on":""}">Disponibles</button>`;
+  $("#filters").querySelectorAll("button").forEach(b=>b.onclick=()=>{if(b.dataset.d)fDispo=!fDispo;else fLevel=b.dataset.l;renderList()});
+  const ns=LOTN.filter(n=>(fLevel==="all"||levelOf(n).id===fLevel)&&(!fDispo||(LOTS[n].statut||"disponible")==="disponible"));
+  $("#rows").innerHTML=ns.length?ns.map(n=>{const l=LOTS[n],a=annex(l)[0];return`<div class="row-lot" tabindex="0" data-n="${n}">
+    <span class="num" style="background:${colorOf(n)}">${n}</span><b>${l.typo} · ${total(l)} m²</b><button class="btn go" data-f="${n}">Fiche</button>
+    <small>${l.etage}${a?` · ${a[0]} ${a[1]} m²`:""} · ${statChip(l)}</small></div>`}).join(""):`<div class="empty">Aucun lot ne correspond.</div>`;
+  $("#rows").querySelectorAll(".row-lot").forEach(r=>{
+    r.onclick=e=>{const n=r.dataset.n;if(e.target.dataset.f){closeList();goLot(n,true);return}if(portrait.matches)closeList();goLot(n)};
+    r.onkeydown=e=>{if(e.key==="Enter")r.click()}});
+}
+function openList(){stopAll();hideTip();renderList();$("#list").classList.add("open");$("#list").setAttribute("aria-hidden","false")}
+function closeList(){$("#list").classList.remove("open");$("#list").setAttribute("aria-hidden","true")}
+$("#bLots").onclick=openList;$("#l-close").onclick=closeList;
+
+/* aller a un lot : bon etage, meilleur angle (plus grande surface visible), lot mis en evidence */
+function area(p){let a=0;for(let i=0;i<p.length;i++){const[x0,y0]=p[i],[x1,y1]=p[(i+1)%p.length];a+=x0*y1-x1*y0}return Math.abs(a/2)}
+const bestF=n=>{const L=levelOf(n);let b=0,m=-1;L.polys.forEach((F,i)=>{const a=area(F[n]);if(a>m){m=a;b=i}});return b};
+let spinT=null;
+function spinTo(f,done){clearInterval(spinT);const go=()=>{let d=((f-cur_f)%NF+NF)%NF;if(d>NF/2)d-=NF;if(!d){clearInterval(spinT);spinT=null;done&&done();return}setFrame(cur_f+Math.sign(d))};spinT=setInterval(go,55);go()}
+function tipAt(n){const p=polyEl[n];if(!p)return;const r=p.getBoundingClientRect();showTip(n,{clientX:r.left+r.width/2,clientY:r.top+r.height/2},coarse)}
+function flash(n){const p=polyEl[n];if(p){p.classList.remove("flash");void p.getBoundingClientRect();p.classList.add("flash")}}
+function goLot(n,fiche){
+  stopAll();hideTip();const L=levelOf(n);if(!L)return;setLevel(L,true);
+  spinTo(bestF(n),()=>{flash(n);if(fiche)openLot(n);else{tipAt(n);setHash(`lot-${n}`)}});
+}
+
+/* lien direct (#lot-3, #etage-rp2), partage, plein ecran */
+let hashLock=false;
+function setHash(h){hashLock=true;try{history.replaceState(null,"",`#${h}`)}catch(e){}setTimeout(()=>hashLock=false,0)}
+function route(){const h=decodeURIComponent(location.hash.slice(1));let m;
+  if((m=h.match(/^lot-(\d+)$/))&&LOTS[m[1]]&&levelOf(m[1]))goLot(m[1],true);
+  else if((m=h.match(/^etage-(.+)$/))){const L=LEVELS.find(x=>x.id===m[1]);if(L)setLevel(L,true)}}
+addEventListener("hashchange",()=>{if(!hashLock)route()});
+function toast(s){const t=$("#toast");t.textContent=s;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800)}
+$("#m-share").onclick=async()=>{const url=location.href.split("#")[0]+`#lot-${cur.n}`,title=`${PROG.name} – Appartement ${cur.n} (${cur.typo})`;
+  if(navigator.share&&coarse){try{await navigator.share({title,url});return}catch(e){if(e.name==="AbortError")return}}
+  try{await navigator.clipboard.writeText(url);toast("Lien copié")}
+  catch(e){const ta=document.createElement("textarea");ta.value=url;ta.style.cssText="position:fixed;opacity:0";document.body.appendChild(ta);ta.select();
+    let ok=false;try{ok=document.execCommand("copy")}catch(_){}ta.remove();toast(ok?"Lien copié":url)}};
+if(document.fullscreenEnabled||document.webkitFullscreenEnabled){
+  $("#bFull").onclick=()=>{const d=document;if(d.fullscreenElement||d.webkitFullscreenElement)(d.exitFullscreen||d.webkitExitFullscreen).call(d);
+    else{const el=d.documentElement;(el.requestFullscreen||el.webkitRequestFullscreen).call(el)}};
+}else $("#bFull").remove();
+
+/* visite guidee : enchaine les lots (etage, meilleur angle, info-bulle) - mode vitrine */
+let tourT=null,tourI=0;
+function stopTour(){if(!tourT)return;clearTimeout(tourT);tourT=null;clearInterval(spinT);$("#tour").classList.remove("on");
+  $("#bTour").innerHTML='▶<span class="lbl"> Visite guidée</span><span class="lbs"> Visite</span>';hideTip()}
+function tourStep(){if(!tourT)return;const n=LOTN[tourI%LOTN.length];tourI++;hideTip();setLevel(levelOf(n),true);
+  spinTo(bestF(n),()=>{if(!tourT)return;flash(n);tipAt(n);
+    tourT=setTimeout(()=>{if(!tourT)return;hideTip();let k=0;spinT=setInterval(()=>{if(!tourT){clearInterval(spinT);return}setFrame(cur_f+1);if(++k>=8){clearInterval(spinT);tourStep()}},90)},3800)})}
+$("#bTour").onclick=()=>{if(tourT){stopTour();return}stopAuto();closeList();tourI=0;tourT=1;$("#tour").classList.add("on");
+  $("#bTour").innerHTML='⏸<span class="lbl"> Arrêter la visite</span><span class="lbs"> Stop</span>';tourStep()};
+$("#tour").onclick=stopTour;
+route();
+</script>
+</body>
+</html>
