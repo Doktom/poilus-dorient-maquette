@@ -106,7 +106,8 @@
      "Terrasse",
      "12,98"
     ]
-   ]
+   ],
+   "statut": "disponible"
   },
   "2": {
    "typo": "T4",
@@ -183,7 +184,8 @@
      "Balcon",
      "8,20"
     ]
-   ]
+   ],
+   "statut": "disponible"
   },
   "3": {
    "typo": "T4",
@@ -256,7 +258,8 @@
      "Balcon",
      "8,90"
     ]
-   ]
+   ],
+   "statut": "disponible"
   },
   "4": {
    "typo": "T4",
@@ -337,7 +340,8 @@
      "Balcon",
      "8,20"
     ]
-   ]
+   ],
+   "statut": "disponible"
   },
   "5": {
    "typo": "T4",
@@ -411,7 +415,8 @@
      "8,28"
     ]
    ],
-   "utile": "108,88"
+   "utile": "108,88",
+   "statut": "disponible"
   }
  }
 }

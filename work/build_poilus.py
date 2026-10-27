@@ -15,14 +15,16 @@ lots = json.load(open(os.path.join(HERE, 'site', 'lots.json'), encoding='utf8'))
 levels = []
 for L in cfg['niveaux']:
     fs = sorted(f for f in os.listdir(os.path.join(HERE, 'final', 'frames')) if f.startswith(L['id'] + '_'))
-    for f in fs:
-        shutil.copy(os.path.join(HERE, 'final', 'frames', f), os.path.join(OUT, 'frames', f))
+    for f in fs:   # WebP : environ 30 a 40 % plus leger que le JPG a qualite egale
+        Image.open(os.path.join(HERE, 'final', 'frames', f)).save(os.path.join(OUT, 'frames', f[:-4] + '.webp'), 'WEBP', quality=80, method=5)
     polys = None
     if L.get('polys'):
         pf = json.load(open(os.path.join(HERE, L['polys'])))
         polys = [{l: [[round(x, 1), round(y, 1)] for x, y in pts] for l, pts in pf[str(k)].items() if l in lots} for k in range(len(fs))]
     levels.append(dict(id=L['id'], label=L['label'], nom=L['nom'], n=len(fs), polys=polys))
-prog = dict(name=cfg['programme'], start=cfg['niveau_initial'])
+prog = dict(name=cfg['programme'], start=cfg['niveau_initial'], ext='webp')
+for n, l in lots.items():
+    l['statut'] = cfg['lots'].get(n, {}).get('statut', 'disponible')   # disponible | reserve | vendu
 # centre horizontal du batiment par image (cadrage mobile en portrait) : boite englobante des lots de tous les niveaux
 N = levels[0]['n']
 focus = []
@@ -35,7 +37,12 @@ html = (tpl.replace('__TITLE__', cfg['programme']).replace('__LOTS__', json.dump
 open(os.path.join(OUT, 'index.html'), 'w', encoding='utf8').write(html)
 
 def data_uri(path, mime, maxw=None, q=76):
-    if mime == 'image/jpeg' and maxw:
+    if mime == 'image/webp' and maxw:
+        im = Image.open(path).convert('RGB')
+        if im.width > maxw:
+            im = im.resize((maxw, round(im.height * maxw / im.width)), Image.LANCZOS)
+        b = io.BytesIO(); im.save(b, 'WEBP', quality=q, method=5); raw = b.getvalue()
+    elif mime == 'image/jpeg' and maxw:
         im = Image.open(path).convert('RGB')
         if im.width > maxw:
             im = im.resize((maxw, round(im.height * maxw / im.width)), Image.LANCZOS)
@@ -47,7 +54,7 @@ def data_uri(path, mime, maxw=None, q=76):
 asset = {}
 for f in sorted(os.listdir(os.path.join(OUT, 'frames'))):
     main = f.startswith(cfg['niveau_initial'] + '_')
-    asset['frames/' + f] = data_uri(os.path.join(OUT, 'frames', f), 'image/jpeg', 1600 if main else 1280, 76 if main else 70)
+    asset['frames/' + f] = data_uri(os.path.join(OUT, 'frames', f), 'image/webp', 1600 if main else 1280, 76 if main else 70)
 for f in sorted(os.listdir(os.path.join(OUT, 'img'))):
     big = f.startswith('plan-lot')
     asset['img/' + f] = data_uri(os.path.join(OUT, 'img', f), 'image/jpeg', 1900 if big else 1280, 80 if big else 74)

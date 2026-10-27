@@ -32,3 +32,15 @@ Les rendus 3D ne suivent pas toujours les plans de vente (R+1/R+2 : pas de bloc 
 ## Page (`template_poilus.html`)
 Canvas (images) + SVG (polygones, viewBox 2560×1440). Sélecteur d'étages (angle conservé). Info-bulle au survol, fiche au clic
 (plan de vente image + PDF, plan 3D, vues). Smartphone portrait : vue ×2,2 recadrée sur le bâtiment (`FOCUS`, centre des polygones par image).
+
+## Branche `ameliorations` (à valider par Tom)
+- **Liste des lots** (bouton « ☰ Lots ») : filtres par étage et « Disponibles », clic = bon étage + meilleur angle (image où le lot
+  est le plus visible) + lot mis en évidence ; bouton « Fiche ».
+- **Statuts** : `statut` par lot dans `config_poilus.json` (`disponible` | `reserve` | `vendu`, défaut disponible — aucun statut réel
+  fourni par INOVA). Légende : bascule couleurs « Typo / Statut ». Statut affiché dans l'info-bulle, la fiche et la liste.
+- **Rotation** : images WebP (−28 % : dossier 36→26 Mo, autonome 22→17 Mo), chargement par proximité de l'angle courant,
+  inertie au lâcher (≈6 images max), fondu entre étages.
+- **Liens directs** : `#lot-3` ouvre la fiche (bon étage + angle), `#etage-rp2` ouvre un étage ; l'adresse suit la navigation.
+  Bouton « Partager » (partage natif sur mobile, sinon copie du lien). Bouton plein écran (masqué si non supporté, ex. iPhone).
+- **Zoom dans la fiche** : molette, double-clic / double-appui, pincement, glisser, boutons + / −.
+- **Visite guidée** : enchaîne les lots (étage, angle, info-bulle 3,8 s) — mode vitrine pour écran en espace de vente.
