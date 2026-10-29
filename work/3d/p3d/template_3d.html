@@ -110,6 +110,23 @@ __CSS__
 .gnav{appearance:none;border:0;background:rgba(255,255,255,.08);color:#fff;width:46px;height:64px;border-radius:12px;font-size:34px;cursor:pointer;justify-self:center}
 .gnav:hover{background:rgba(255,255,255,.16)}
 .gbar{grid-column:1/-1;display:flex;justify-content:center;align-items:center;gap:10px;padding:10px 0 18px}#gCount{color:#9aa3ad;font-size:12.5px;margin-right:6px}
+#tourWrap{position:fixed;z-index:2;pointer-events:none;left:0;top:0}
+#tourWrap.feather{-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 9%,#000 91%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 9%,#000 91%,transparent 100%)}
+#tourImg{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;opacity:0;
+  -webkit-mask-image:linear-gradient(100deg,#000 42%,transparent 58%);mask-image:linear-gradient(100deg,#000 42%,transparent 58%);
+  -webkit-mask-size:300% 100%;mask-size:300% 100%;-webkit-mask-position:100% 0;mask-position:100% 0}
+#tourImg.show{opacity:1;-webkit-mask-position:0 0;mask-position:0 0;
+  transition:-webkit-mask-position 1.8s cubic-bezier(.65,0,.25,1),mask-position 1.8s cubic-bezier(.65,0,.25,1),opacity .35s}
+#tourImg.hide{opacity:0;-webkit-mask-position:0 0;mask-position:0 0;transition:opacity .9s ease}
+#tourCap{position:fixed;z-index:4;left:16px;bottom:128px;padding:10px 14px;border-radius:12px;background:rgba(15,19,25,.78);color:#fff;
+  backdrop-filter:blur(8px);opacity:0;transform:translateY(8px);transition:opacity .5s,transform .5s;pointer-events:none;max-width:min(420px,calc(100vw - 32px))}
+#tourCap.show{opacity:1;transform:none}#tourCap b{display:block;font-size:16px}#tourCap small{color:#c3cad2;font-size:12px}
+#tourBar{position:fixed;z-index:5;left:50%;top:16px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:6px 8px 6px 14px;border-radius:14px;overflow:hidden}
+#tourBar[hidden]{display:none}.tb-t{font-weight:700;font-size:13px}
+#tbDots{display:flex;gap:4px;margin-right:4px}#tbDots i{width:8px;height:8px;border-radius:4px;background:#d3d9e0;cursor:pointer}#tbDots i.on{background:var(--ink);width:18px}
+#tbProg{position:absolute;left:0;bottom:0;height:3px;background:var(--ink);width:0}
+.dk-tour{appearance:none;border:0;background:var(--ink);color:#fff;border-radius:11px;padding:6px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:600 11px/1.15 system-ui;cursor:pointer;min-width:70px}
+.dk-tour .ico{font-size:17px}.dk-tour:hover{background:#2c3440}body.touring .dk-tour{background:#f2994a}
 @media (max-width:860px){
  #hdr{left:8px;top:8px;max-width:calc(100vw - 186px);padding:8px 11px}#hdr b{font-size:15px}#hdr small{font-size:11px}#hState{font-size:11.5px;margin-top:4px}
  #nav{right:8px;top:8px;flex-direction:column}#nav button{padding:7px 10px;font-size:12px}
@@ -120,6 +137,10 @@ __CSS__
  #dock{left:8px;right:8px;transform:none;bottom:8px;max-width:none;padding:6px}
  .dk-home{min-width:54px;font-size:0}.dk-home .ico{font-size:20px}
  .sv{width:104px}
+ .dk-tour{min-width:54px;font-size:0}.dk-tour .ico{font-size:18px}
+ #tourBar{top:auto;bottom:124px;left:8px;right:8px;transform:none;justify-content:space-between}
+ #tourCap{left:8px;right:8px;bottom:196px;max-width:none}
+ body.touring #floors{display:none}
  #tools{right:8px;top:72px;bottom:auto;flex-direction:column;padding:4px}.ic{width:36px;height:36px;font-size:16px}
  #settings{right:56px;top:72px;bottom:auto;width:min(300px,calc(100vw - 72px))}
  #credits{left:8px;bottom:auto;top:auto;display:none}
@@ -138,7 +159,12 @@ __CSS__
 <header id="hdr" class="glass"><b id="hTitle">__TITLE__</b><small id="hAddr"></small><span id="hState"></span></header>
 <nav id="nav" class="glass" aria-label="Affichage"><button id="nav3d" class="on" aria-pressed="true">Maquette 3D</button><button id="navGal" aria-pressed="false">Galerie <b id="galN"></b></button></nav>
 <aside id="floors" class="glass" aria-label="Étages"><div class="cardh">Étages</div><div id="flist" role="group"></div><div id="lots"></div></aside>
-<div id="dock" class="glass"><button id="home" class="dk-home" title="Revenir à la vue d'ensemble"><span class="ico">⌂</span><span>Vue<br>d'ensemble</span></button>
+<div id="tourWrap" aria-hidden="true"><img id="tourImg" alt=""></div>
+<div id="tourCap" aria-live="polite"></div>
+<div id="tourBar" class="glass" hidden><span class="tb-t">Visite guidée</span><span id="tbDots"></span>
+ <button class="ic" id="tbPause" title="Pause">⏸</button><button class="ic" id="tbNext" title="Vue suivante">⏭</button><button class="ic" id="tbStop" title="Quitter la visite">✕</button>
+ <i id="tbProg"></i></div>
+<div id="dock" class="glass"><button id="tour" class="dk-tour" title="Visite guidée des points de vue"><span class="ico">▶</span><span>Visite<br>guidée</span></button><button id="home" class="dk-home" title="Revenir à la vue d'ensemble"><span class="ico">⌂</span><span>Vue<br>d'ensemble</span></button>
  <div id="strip" role="list" aria-label="Points de vue"></div></div>
 <div id="tools" class="glass"><button class="ic" id="tAuto" title="Rotation automatique" aria-pressed="false">⟳</button><button class="ic" id="tSet" title="Réglages d'affichage" aria-expanded="false">⚙</button><button class="ic" id="tFull" title="Plein écran">⛶</button><button class="ic" id="tHelp" title="Aide">?</button></div>
 <div id="settings" class="glass" hidden><div class="sth">Style du rendu</div><div class="seg" id="segStyle"></div><div class="sth">Fond de carte</div><div class="seg" id="segFond"></div>
@@ -592,13 +618,13 @@ const FLONG={all:"Bâtiment complet",rp3:"Étage 3 · combles",rp2:"Étage 2",r1
 function floorsUI(){
   $("#flist").innerHTML=[...order].reverse().map(id=>`<button data-id="${id}" class="${id===cur?"on":""}" aria-pressed="${id===cur}">
     <span>${id==="all"?"Bâtiment":NAMES[id][0]}<small> · ${id==="all"?"vue complète":FLONG[id]}</small></span>${lotsAt(id)?`<span class="badge">${lotsAt(id)} lots</span>`:""}</button>`).join("");
-  $("#flist").querySelectorAll("button").forEach(b=>b.onclick=()=>setLevel(b.dataset.id));
+  $("#flist").querySelectorAll("button").forEach(b=>b.onclick=()=>{stopTour();setLevel(b.dataset.id)});
   const ns=Object.keys(lotByN).filter(n=>lotByN[n].level===cur);
   $("#lots").innerHTML=ns.length?ns.map(n=>`<button class="lot-row" data-n="${n}"><i style="background:${COLORS[LOTS[n].typo]}"></i>
     <span><b>Lot ${n} · ${LOTS[n].typo}</b><small>${annex(LOTS[n]).map(r=>r[0]+" "+r[1]+" m²").join(" · ")||LOTS[n].etage}</small></span><em>${total(LOTS[n])} m²</em></button>`).join("")
     +`<p class="lot-hint">Cliquez un lot (ici ou sur la maquette) pour sa fiche.</p>`:"";
   $("#lots").querySelectorAll(".lot-row").forEach(b=>{const n=b.dataset.n;
-    b.onmouseenter=b.onfocus=()=>highlight(n);b.onmouseleave=b.onblur=()=>highlight(null);b.onclick=()=>openLot(n)});
+    b.onmouseenter=b.onfocus=()=>highlight(n);b.onmouseleave=b.onblur=()=>highlight(null);b.onclick=()=>{stopTour();openLot(n)}});
   $("#hState").textContent=ns.length?`${FLONG[cur]} · ${ns.length} appartements à découvrir`:(cur==="all"?"Choisissez un étage pour voir l'intérieur":`${FLONG[cur]} · vue en coupe`);
 }
 document.addEventListener("keydown",e=>{if($("#modal").classList.contains("open")||!$("#gallery").hidden)return;
@@ -653,6 +679,7 @@ function buildUI(){
     <img src="${R[v.id]?A(R[v.id].thumb):""}" alt="" loading="lazy"><span>${v.name}</span>${R[v.id]?`<i class="ph" data-photo="${v.id}" title="Voir le rendu photo">📷</i>`:""}</button>`).join("");
   $("#strip").querySelectorAll(".sv").forEach(b=>b.onclick=e=>{
     if(e.target.closest(".ph")){openGallery(GAL.findIndex(g=>g.view===b.dataset.id&&g.kind==="rendu"));return}
+    if(TOUR.on){const i=TOUR.ids.indexOf(b.dataset.id);if(i>=0){runTour(i);return}stopTour()}
     goView(b.dataset.id)});
   GAL=[...VIEWS.filter(v=>R[v.id]).map(v=>({kind:"rendu",file:R[v.id].file,thumb:R[v.id].thumb,name:v.name,sub:v.sub,credit:R[v.id].credit,view:v.id})),
        ...PS.map(p=>({kind:"persp",file:p.file,thumb:p.thumb,name:p.name,sub:p.sub,credit:p.credit,view:p.view}))];
@@ -667,7 +694,7 @@ function buildUI(){
 }
 let GAL=[],gi=0;
 function navUI(gal){$("#nav3d").classList.toggle("on",!gal);$("#navGal").classList.toggle("on",gal);$("#nav3d").setAttribute("aria-pressed",!gal);$("#navGal").setAttribute("aria-pressed",gal)}
-function openGallery(i){closeSettings();$("#gallery").hidden=false;navUI(true);if(i>=0)showImg(i);else{$("#gView").hidden=true}}
+function openGallery(i){closeSettings();stopTour();$("#gallery").hidden=false;navUI(true);if(i>=0)showImg(i);else{$("#gView").hidden=true}}
 function closeGallery(){$("#gallery").hidden=true;$("#gView").hidden=true;navUI(false)}
 function showImg(i){if(!GAL.length)return;gi=(i+GAL.length)%GAL.length;const g=GAL[gi];
   $("#gView").hidden=false;$("#gImg").src=A(g.file);$("#gImg").alt=g.name;$("#gCap").innerHTML=`${g.name}<small>${g.sub} · ${g.credit||""}</small>`;
@@ -679,7 +706,7 @@ $("#g3d").onclick=()=>{const v=GAL[gi].view;closeGallery();if(v)goView(v)};
 {let sx=null;$("#gImg").addEventListener("pointerdown",e=>{sx=e.clientX});$("#gImg").addEventListener("pointerup",e=>{if(sx!==null&&Math.abs(e.clientX-sx)>50)showImg(gi+(e.clientX<sx?1:-1));sx=null})}
 /* outils */
 function setAutoUI(on){$("#tAuto").setAttribute("aria-pressed",on);$("#tAuto").title=on?"Arrêter la rotation":"Rotation automatique"}
-$("#tAuto").onclick=()=>{fly=null;controls.autoRotate=!controls.autoRotate;setAutoUI(controls.autoRotate)};
+$("#tAuto").onclick=()=>{stopTour();fly=null;controls.autoRotate=!controls.autoRotate;setAutoUI(controls.autoRotate)};
 function closeSettings(){$("#settings").hidden=true;$("#tSet").setAttribute("aria-expanded","false")}
 $("#tSet").onclick=e=>{e.stopPropagation();const o=$("#settings").hidden;$("#settings").hidden=!o;$("#tSet").setAttribute("aria-expanded",o)};
 document.addEventListener("pointerdown",e=>{if(!$("#settings").hidden&&!e.target.closest("#settings,#tSet"))closeSettings()});
@@ -687,7 +714,7 @@ $("#tFull").onclick=()=>{const d=document;if(d.fullscreenElement)d.exitFullscree
 $("#tHelp").onclick=()=>{$("#coach").hidden=false};
 $("#coachOk").onclick=()=>{$("#coach").hidden=true;try{localStorage.setItem("poilus3d-coach","1")}catch(e){}};
 cv.addEventListener("pointerdown",()=>{if(!$("#coach").hidden)setTimeout(()=>{$("#coach").hidden=true;try{localStorage.setItem("poilus3d-coach","1")}catch(e){}},2500)});
-$("#home").onclick=()=>{fly=null;setLevel("all");goHome()};
+$("#home").onclick=()=>{stopTour();fly=null;setLevel("all");goHome()};
 document.addEventListener("keydown",e=>{
   if(!$("#gallery").hidden){if(e.key==="ArrowRight")showImg(gi+1);if(e.key==="ArrowLeft")showImg(gi-1);
     if(e.key==="Escape"){if(!$("#gView").hidden)$("#gView").hidden=true;else closeGallery()}return}
@@ -714,12 +741,13 @@ const VIEWS=[
 let fly=null;
 const ease=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
 const SUN0=sun.position.clone();
-function goView(id,instant){
+const CAPK=1.194;   /* recul appliqué lors des captures envoyées à Magnific (fenêtre de rapport ≈ 0,94) : la visite reprend cette pose */
+function goView(id,instant,exact){
   const v=VIEWS.find(x=>x.id===id);if(!v)return;
   if(v.sun)sun.position.set(...v.sun);else sun.position.copy(SUN0);
   if(v.level&&v.level!==cur)setLevel(v.level);
   controls.autoRotate=false;setAutoUI(false);
-  const k=camera.aspect<1.25?Math.min(1.6,1.25/camera.aspect*.9):1;      /* cadrage portrait : recul */
+  const k=exact?CAPK:(camera.aspect<1.25?Math.min(1.6,1.25/camera.aspect*.9):1);      /* cadrage portrait : recul */
   const P=new THREE.Vector3(...v.pos),G=new THREE.Vector3(...v.tgt);P.sub(G).multiplyScalar(k).add(G);
   fly={p0:camera.position.clone(),t0:controls.target.clone(),f0:camera.fov,p1:P,t1:G,f1:v.fov,s:performance.now(),d:instant?0:1400};
   document.querySelectorAll("#strip .sv").forEach(b=>{b.classList.toggle("on",b.dataset.id===id);if(b.dataset.id===id)b.scrollIntoView({block:"nearest",inline:"nearest",behavior:"smooth"})});
@@ -734,11 +762,60 @@ function stepFly(now){
 controls.addEventListener("start",()=>{fly=null});
 controls.maxPolarAngle=Math.PI*0.6;
 
+/* ---------- visite guidée (dans la fenêtre 3D) ---------- */
+const TOUR={on:false,i:0,paused:false,tk:0,ids:[],view:null};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const IMG_AR=16/9;                                   /* cadre des captures (2560 × 1440) */
+/* l'image occupe toute la largeur : la caméra garde le même champ horizontal que la capture */
+function tourFov(f){const a=camera.aspect;return 2*Math.atan(Math.tan(f*Math.PI/360)*IMG_AR/a)*180/Math.PI}
+function layoutTour(){const W=innerWidth,H=innerHeight,w=W,h=W/IMG_AR;
+  const s=$("#tourWrap").style;s.width=w+"px";s.height=h+"px";s.left="0";s.top=(H-h)/2+"px";$("#tourWrap").classList.toggle("feather",h<H-2)}
+function overlayOff(){const im=$("#tourImg");im.classList.remove("show");im.classList.add("hide");$("#tourCap").classList.remove("show")}
+function tourBarUI(){
+  $("#tourBar").hidden=!TOUR.on;document.body.classList.toggle("touring",TOUR.on);
+  $("#tour").querySelector("span:last-child").innerHTML=TOUR.on?"Visite<br>en cours":"Visite<br>guidée";
+  $("#tbDots").innerHTML=TOUR.ids.map((id,i)=>`<i class="${i===TOUR.i?"on":""}" data-i="${i}" title="${VIEWS.find(v=>v.id===id).name}"></i>`).join("");
+  $("#tbDots").querySelectorAll("i").forEach(d=>d.onclick=()=>runTour(+d.dataset.i));
+  $("#tbPause").textContent=TOUR.paused?"▶":"⏸";$("#tbPause").title=TOUR.paused?"Reprendre":"Pause";
+}
+async function runTour(start=0){
+  const R=window.RENDERS||{};
+  TOUR.ids=VIEWS.filter(v=>R[v.id]).map(v=>v.id);if(!TOUR.ids.length)return;
+  const tk=++TOUR.tk;TOUR.on=true;TOUR.paused=false;hideTip();closeSettings();
+  TOUR.ids.forEach(id=>{const im=new Image();im.src=A(R[id].file)});
+  for(let i=start;;i=(i+1)%TOUR.ids.length){
+    if(tk!==TOUR.tk)return;
+    TOUR.i=i;tourBarUI();$("#tbProg").style.width="0";
+    const id=TOUR.ids[i],v=VIEWS.find(x=>x.id===id);TOUR.view=v;
+    overlayOff();
+    goView(id,false,true);fly.d=2400;fly.f1=tourFov(v.fov);
+    while(fly){await sleep(50);if(tk!==TOUR.tk)return}
+    await sleep(300);if(tk!==TOUR.tk)return;
+    const im=$("#tourImg");im.src=A(R[id].file);try{await im.decode()}catch(e){}
+    if(tk!==TOUR.tk)return;
+    layoutTour();im.classList.remove("hide");void im.offsetWidth;im.classList.add("show");
+    $("#tourCap").innerHTML=`<b>${v.name}</b><small>${v.sub} · rendu photoréaliste · illustration non contractuelle</small>`;$("#tourCap").classList.add("show");
+    const HOLD=5500;let el=0;
+    while(el<HOLD){await sleep(100);if(tk!==TOUR.tk)return;if(!TOUR.paused)el+=100;$("#tbProg").style.width=(100*el/HOLD)+"%"}
+    overlayOff();await sleep(900);
+  }
+}
+function stopTour(){if(!TOUR.on)return;TOUR.tk++;TOUR.on=false;TOUR.paused=false;TOUR.view=null;overlayOff();fly=null;tourBarUI()}
+$("#tour").onclick=()=>{if(TOUR.on)stopTour();else runTour(0)};
+$("#tbStop").onclick=stopTour;
+$("#tbNext").onclick=()=>runTour((TOUR.i+1)%TOUR.ids.length);
+$("#tbPause").onclick=()=>{TOUR.paused=!TOUR.paused;tourBarUI()};
+cv.addEventListener("pointerdown",()=>{if(TOUR.on)stopTour()});
+addEventListener("resize",()=>{if(TOUR.on&&TOUR.view){layoutTour();camera.fov=tourFov(TOUR.view.fov);camera.updateProjectionMatrix()}});
+document.addEventListener("keydown",e=>{if(!TOUR.on||!$("#gallery").hidden||$("#modal").classList.contains("open"))return;
+  if(e.key===" "){e.preventDefault();TOUR.paused=!TOUR.paused;tourBarUI()}
+  if(e.key==="Escape")stopTour();if(e.key==="ArrowRight")runTour((TOUR.i+1)%TOUR.ids.length);if(e.key==="ArrowLeft")runTour((TOUR.i-1+TOUR.ids.length)%TOUR.ids.length)});
+
 /* ---------- capture haute définition (rendus des points de vue) ---------- */
 async function capture(id,w=2560,h=1440,q=.92){
   const keep=[renderer.getPixelRatio(),innerWidth,innerHeight,camera.aspect];
-  goView(id,true);stepFly(performance.now());
-  renderer.setPixelRatio(1);renderer.setSize(w,h,false);composer.setPixelRatio(1);composer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();
+  goView(id,true,true);stepFly(performance.now());
+  renderer.setPixelRatio(1);renderer.setSize(w,h,false);composer.setPixelRatio(1);composer.setSize(w,h);camera.aspect=w/h;camera.fov=VIEWS.find(x=>x.id===id).fov;camera.updateProjectionMatrix();
   controls.update();
   for(let i=0;i<3;i++){if(useAO&&STYLE!=="dessin")composer.render();else renderer.render(scene,camera)}
   const url=cv.toDataURL("image/jpeg",q);
