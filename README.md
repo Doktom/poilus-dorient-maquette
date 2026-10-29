@@ -15,6 +15,13 @@ Polygones cliquables :
 - **R+3** (comble) : lot 5, tout l'étage sauf la cage d'escalier.
 Survol : info-bulle ; clic : fiche (plan de vente, PDF, plan 3D, vues intérieures).
 
+## Maquette 3D interactive (`docs/3d/`, sources `work/3d/`)
+Maquette 3D manipulable (Three.js r160) : bâtiment complet, coupe par étage, lots 1 et 2 cliquables au R+1 (mêmes fiches),
+styles Illustré / Dessin / Maquette blanche, fond Plan IGN ou photo aérienne, quartier réel (OSM + hauteurs BD TOPO IGN),
+6 points de vue avec rendus photoréalistes Magnific et galerie (avec les 2 perspectives officielles).
+Une fois `docs/` publié : `…/3d/`. Détails, méthode et limites : [`work/3d/README.md`](work/3d/README.md).
+Reconstruction : `python work/3d/p3d/build_3d.py <sortie>` (dossier de travail d'origine : C:\Users\tom\Temp\pdo).
+
 ## Méthode des polygones (work/)
 R+2 : `python f0level.py src/rp2 R+2 polygones-R2.json 3:T4:15 4:T4:285,295` (pièces = zones non blanches fermées, `segment_rooms`)
 puis `python fitmask.py src/rp2 polygones-R2.json polys_rp2.json` (médiane 0,2 px).
