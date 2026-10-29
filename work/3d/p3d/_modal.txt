@@ -1,0 +1,10 @@
+<div id="tip" role="tooltip"></div>
+<div id="modal" aria-hidden="true">
+ <div id="card" role="dialog" aria-modal="true">
+  <div id="hd"><span class="badge" id="m-badge"></span><h2 id="m-title"></h2><span class="sp"></span>
+   <a class="btn" id="m-dl" download target="_blank" rel="noopener">⬇ Plan de vente (PDF)</a>
+   <button class="btn dark" id="m-close" aria-label="Fermer">✕ Fermer</button></div>
+  <div id="main"><div id="tabs"></div><div id="view"></div></div>
+  <aside id="side"></aside>
+ </div>
+</div>
