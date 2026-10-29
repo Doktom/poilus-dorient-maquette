@@ -1,0 +1,32 @@
+/* fiche complète */
+let cur=null,tab="pdf",vIdx=0;
+function openLot(n){
+  hideTip();cur=LOTS[n];cur.n=n;tab="pdf";vIdx=0;
+  const m=$("#modal");
+  $("#m-badge").textContent=cur.typo;$("#m-badge").style.background=COLORS[cur.typo];
+  $("#m-title").textContent=`Appartement ${n} · ${cur.etage}`;
+  $("#m-dl").href=A(`pdf/lot-${String(n).padStart(2,"0")}.pdf`);$("#m-dl").setAttribute("download",`plan-de-vente-lot-${String(n).padStart(2,"0")}.pdf`);
+  const a=annex(cur);
+  $("#side").innerHTML=`<div class="kpis"><div class="kpi"><small>Surface habitable</small><b>${total(cur)} m²</b></div><div class="kpi"><small>Typologie</small><b>${cur.typo}</b></div>${cur.utile?`<div class="kpi"><small>Surface utile</small><b>${cur.utile} m²</b></div>`:""}</div>
+   <h3>Surfaces habitables</h3><table>${rooms(cur).map(r=>`<tr><td>${r[0]}</td><td>${r[1]} m²</td></tr>`).join("")}<tr class="tot"><td>Total</td><td>${total(cur)} m²</td></tr></table>
+   ${a.length?`<h3>Extérieurs</h3><table>${a.map(r=>`<tr><td>${r[0]}</td><td>${r[1]} m²</td></tr>`).join("")}</table>`:""}
+   <p class="note">Surfaces approximatives, plans non contractuels. Mobilier indicatif.</p>`;
+  renderTabs();m.classList.add("open");m.setAttribute("aria-hidden","false");$("#m-close").focus();
+}
+const plan3d=l=>l.views.find(v=>/plan/i.test(v.label));
+const inter=l=>l.views.filter(v=>!/plan/i.test(v.label));
+function renderTabs(){
+  const t=[["pdf","Plan de vente"]];if(plan3d(cur))t.push(["3d","Plan 3D"]);if(inter(cur).length)t.push(["int","Vues intérieures"]);
+  $("#tabs").innerHTML=t.map(([k,l])=>`<button class="${k===tab?"on":""}" data-k="${k}">${l}</button>`).join("");
+  $("#tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{tab=b.dataset.k;vIdx=0;renderTabs()});
+  const v=$("#view");
+  if(tab==="pdf")v.innerHTML=`<div class="pic"><img src="${A(`img/plan-lot${String(cur.n).padStart(2,"0")}.jpg`)}" alt="Plan de vente"></div>`;
+  else if(tab==="3d")v.innerHTML=`<div class="pic"><img src="${A(plan3d(cur).file)}" alt="Plan 3D"></div>`;
+  else{const L=inter(cur);
+    v.innerHTML=`<div class="pic"><img id="big" src="${A(L[vIdx].file)}" alt="${L[vIdx].label}"></div><div id="thumbs">${L.map((x,i)=>`<img src="${A(x.file)}" alt="${x.label}" title="${x.label}" class="${i===vIdx?"on":""}" data-i="${i}">`).join("")}</div>`;
+    v.querySelectorAll("#thumbs img").forEach(im=>im.onclick=()=>{vIdx=+im.dataset.i;renderTabs()});}
+}
+function closeLot(){$("#modal").classList.remove("open");$("#modal").setAttribute("aria-hidden","true");$("#view").innerHTML=""}
+$("#m-close").onclick=closeLot;
+$("#modal").addEventListener("click",e=>{if(e.target.id==="modal")closeLot()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeLot()});
