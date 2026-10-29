@@ -1,0 +1,74 @@
+[
+ {
+  "file": "persp/persp_00.jpg",
+  "titre": "Façade sur rue",
+  "image": 0,
+  "taille": [
+   2093,
+   1395
+  ]
+ },
+ {
+  "file": "persp/persp_01.jpg",
+  "titre": "Trois-quarts côté rue",
+  "image": 3,
+  "taille": [
+   2160,
+   1440
+  ]
+ },
+ {
+  "file": "persp/persp_02.jpg",
+  "titre": "Pignon et accès",
+  "image": 7,
+  "taille": [
+   2402,
+   1600
+  ]
+ },
+ {
+  "file": "persp/persp_03.jpg",
+  "titre": "Trois-quarts côté jardin",
+  "image": 11,
+  "taille": [
+   2306,
+   1537
+  ]
+ },
+ {
+  "file": "persp/persp_04.jpg",
+  "titre": "Façade sur jardin",
+  "image": 15,
+  "taille": [
+   2035,
+   1357
+  ]
+ },
+ {
+  "file": "persp/persp_05.jpg",
+  "titre": "Jardin et aire de jeux",
+  "image": 18,
+  "taille": [
+   2029,
+   1353
+  ]
+ },
+ {
+  "file": "persp/persp_06.jpg",
+  "titre": "Pignon côté voisin",
+  "image": 22,
+  "taille": [
+   2365,
+   1575
+  ]
+ },
+ {
+  "file": "persp/persp_07.jpg",
+  "titre": "Trois-quarts rue, côté droit",
+  "image": 26,
+  "taille": [
+   2379,
+   1586
+  ]
+ }
+]
