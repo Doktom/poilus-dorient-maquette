@@ -50,3 +50,14 @@ Pages sert la branche `gh-pages` = contenu de `docs/` de `main` (actuellement v2
 - Site : https://doktom.github.io/poilus-dorient-maquette/ (ex. `…/#lot-3`)
 - Pour tester une branche avant fusion : publier son `docs/` dans `gh-pages/test/` (`git archive <branche> docs`), lien `…/test/`.
 Mise à jour : dans un clone de `gh-pages`, remplacer le contenu par `git archive main docs`, commit, push.
+
+## v3 (branche `v3`, en test sur https://doktom.github.io/poilus-dorient-maquette/test/)
+- **Rotation continue** : entre deux des 30 vues, fondu de l'image suivante + polygones interpolés (`setFrame` accepte une
+  position fractionnaire). Rotation auto, inertie, flèches, boussole, « aller au lot » et visite guidée sont animés ; au repos la
+  vue se recale toujours sur une image nette (`settle`). Pas de vues intermédiaires calculées (piste : interpolation par flux optique).
+- **Perspectives fond blanc** : `work/perspectives.py <images TOITURE 2560 px> site/persp` → 8 angles du niveau Toit, fond ramené
+  au blanc pur (division par la couleur du fond, ombres conservées), recadrage 3:2. Galerie plein écran (bouton « 🖼 Perspectives ») :
+  flèches, vignettes, balayage, zoom, « Voir en 360° » (niveau Toit, même angle). Définition native ≈ 2000–2400 px, sans agrandissement.
+- **Confort** : écran de chargement, aide « Glissez pour faire tourner » au premier usage (mémorisée), boussole « RUE » (clic = retour
+  face à la rue), fiche : lot précédent / suivant (‹ › et flèches du clavier), flèches sur les vues intérieures, bouton « 🧊 Maquette 3D »
+  (`lien_3d` dans la config). Boutons d'en-tête compactés sur téléphone.

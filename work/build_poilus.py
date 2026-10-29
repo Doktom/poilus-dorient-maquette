@@ -11,6 +11,16 @@ shutil.rmtree(OUT, ignore_errors=True)
 shutil.copytree(os.path.join(HERE, 'site', 'img'), os.path.join(OUT, 'img'))
 shutil.copytree(os.path.join(HERE, 'site', 'pdf'), os.path.join(OUT, 'pdf'))
 os.makedirs(os.path.join(OUT, 'frames'))
+# perspectives exterieures (perspectives.py -> site/persp) : image + vignette
+persp = []
+PD = os.path.join(HERE, 'site', 'persp')
+if os.path.exists(os.path.join(PD, 'perspectives.json')):
+    os.makedirs(os.path.join(OUT, 'persp'))
+    for p in json.load(open(os.path.join(PD, 'perspectives.json'), encoding='utf8')):
+        fn = os.path.basename(p['file']); im = Image.open(os.path.join(PD, fn)).convert('RGB')
+        big = im.copy(); big.thumbnail((2400, 1600), Image.LANCZOS); big.save(os.path.join(OUT, 'persp', fn), quality=86)
+        th = im.copy(); th.thumbnail((240, 160), Image.LANCZOS); th.save(os.path.join(OUT, 'persp', 'th_' + fn), quality=80)
+        persp.append(dict(file='persp/' + fn, thumb='persp/th_' + fn, titre=p['titre'], image=p['image'], niveau='toiture'))
 lots = json.load(open(os.path.join(HERE, 'site', 'lots.json'), encoding='utf8'))
 levels = []
 for L in cfg['niveaux']:
@@ -22,7 +32,7 @@ for L in cfg['niveaux']:
         pf = json.load(open(os.path.join(HERE, L['polys'])))
         polys = [{l: [[round(x, 1), round(y, 1)] for x, y in pts] for l, pts in pf[str(k)].items() if l in lots} for k in range(len(fs))]
     levels.append(dict(id=L['id'], label=L['label'], nom=L['nom'], n=len(fs), polys=polys))
-prog = dict(name=cfg['programme'], start=cfg['niveau_initial'], ext='webp')
+prog = dict(name=cfg['programme'], start=cfg['niveau_initial'], ext='webp', link3d=cfg.get('lien_3d'))
 for n, l in lots.items():
     l['statut'] = cfg['lots'].get(n, {}).get('statut', 'disponible')   # disponible | reserve | vendu
 # centre horizontal du batiment par image (cadrage mobile en portrait) : boite englobante des lots de tous les niveaux
@@ -33,7 +43,7 @@ for k in range(N):
     focus.append(round((min(xs) + max(xs)) / 2) if xs else 1280)
 tpl = open(os.path.join(HERE, 'template_poilus.html'), encoding='utf8').read()
 html = (tpl.replace('__TITLE__', cfg['programme']).replace('__LOTS__', json.dumps(lots, ensure_ascii=False))
-        .replace('__PROG__', json.dumps(prog, ensure_ascii=False)).replace('__LEVELS__', json.dumps(levels, ensure_ascii=False)).replace('__FOCUS__', json.dumps(focus)))
+        .replace('__PROG__', json.dumps(prog, ensure_ascii=False)).replace('__LEVELS__', json.dumps(levels, ensure_ascii=False)).replace('__FOCUS__', json.dumps(focus)).replace('__PERSP__', json.dumps(persp, ensure_ascii=False)))
 open(os.path.join(OUT, 'index.html'), 'w', encoding='utf8').write(html)
 
 def data_uri(path, mime, maxw=None, q=76):
@@ -58,6 +68,8 @@ for f in sorted(os.listdir(os.path.join(OUT, 'frames'))):
 for f in sorted(os.listdir(os.path.join(OUT, 'img'))):
     big = f.startswith('plan-lot')
     asset['img/' + f] = data_uri(os.path.join(OUT, 'img', f), 'image/jpeg', 1900 if big else 1280, 80 if big else 74)
+for f in sorted(os.listdir(os.path.join(OUT, 'persp'))) if persp else []:
+    asset['persp/' + f] = data_uri(os.path.join(OUT, 'persp', f), 'image/jpeg', 1800 if not f.startswith('th_') else None, 80)
 for f in sorted(os.listdir(os.path.join(OUT, 'pdf'))):
     asset['pdf/' + f] = data_uri(os.path.join(OUT, 'pdf', f), 'application/pdf')
 js = '<script>window.ASSET=' + json.dumps(asset) + ';</script>\n'
