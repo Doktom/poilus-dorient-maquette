@@ -55,3 +55,7 @@ En vue d'étage, les niveaux au-dessus disparaissent et l'étage est coupé à 1
   (clic = vol de caméra, 📷 = rendu en grand) · outils : rotation, Réglages (style du rendu et fond de carte en choix explicites),
   plein écran, aide · galerie plein écran (6 rendus Magnific + 2 perspectives, flèches / clavier / balayage, « Voir en 3D »)
   · écran de chargement illustré · aide au premier lancement. Mise en page dédiée mobile.
+- Visite guidée (bouton « ▶ Visite guidée », dans la fenêtre 3D, sans fenêtre surgissante) : pour chaque point de vue, vol de caméra
+  vers la pose exacte de la capture envoyée à Magnific (recul CAPK = 1,194), révélation du rendu photoréaliste par balayage calé
+  sur la 3D, légende, 5,5 s, effacement, vue suivante, en boucle. Barre : pastilles (aller à une vue), pause (ou Espace),
+  suivant (ou →), quitter (ou Échap / toucher la maquette). Image en pleine largeur, champ de caméra ajusté au format d'écran.
