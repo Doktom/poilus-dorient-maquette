@@ -32,7 +32,6 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);font:14px/1.
 .lot{fill:var(--c,#f2994a);stroke:var(--c,#f2994a)}
 .lot.flash{animation:flash .9s ease 3}
 @keyframes flash{50%{fill-opacity:.85;stroke-width:8}}
-#fade{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;transition:opacity .45s ease}
 #topr{display:flex;gap:8px;align-items:flex-start}
 #legend .mode{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-left:4px}
 #legend .mode button{appearance:none;border:0;background:#fff;padding:3px 8px;font:600 11.5px system-ui;color:var(--mute);cursor:pointer}
@@ -158,7 +157,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);font:14px/1.
 @media (max-aspect-ratio:1/1){
  html,body,#stage{background:#f6f4f9}
  #stage{display:block}
- #wrap{position:absolute;left:0;top:50%;width:auto;height:min(62vh,calc(220vw*1440/2560));max-height:none;transform:translateY(-50%);transition:transform .12s linear}
+ #wrap{position:absolute;left:0;top:50%;width:auto;height:min(62vh,calc(220vw*1440/2560));max-height:none;transform:translateY(-50%)}
  #ui{inset:0;left:0;top:0;transform:none;width:auto;aspect-ratio:auto;max-height:none}
  #top{left:10px;right:10px;top:max(10px,env(safe-area-inset-top));flex-direction:row;gap:8px}
  .chip{padding:7px 10px;box-shadow:0 2px 10px rgba(0,0,0,.12)}.chip b{font-size:14px}.chip small{font-size:11.5px}
@@ -326,28 +325,27 @@ function progress(k){
   const el=$("#load");if(!el)return;if(k>=NF||$("#splash")){el.style.display="none"}else{el.style.display="";el.textContent=`Chargement des vues… ${k}/${NF}`}}
 const wrapI=i=>((i%NF)+NF)%NF;
 function srcOf(i){const c=IMG[LV.id]||[],b=BM[LV.id]||[];return b[i]||(c[i]&&c[i].naturalWidth?c[i]:null)}
-/* image fractionnaire : vue i + fondu de la vue suivante (rotation continue au lieu de pas de 12 degres) */
-function draw(){const fl=Math.floor(fpos),t=fpos-fl,i=wrapI(fl),j=wrapI(fl+1);const a=srcOf(i),b=srcOf(j);
-  if(!a&&!b)return false;ctx.globalAlpha=1;ctx.drawImage(a||b,0,0,cv.width,cv.height);
-  if(a&&b&&t>0.01){ctx.globalAlpha=t;ctx.drawImage(b,0,0,cv.width,cv.height);ctx.globalAlpha=1}return true}
+/* vue nette la plus proche, sans fondu entre vues (le fondu donnait le mal de mer) */
+function draw(){const i=wrapI(Math.round(fpos)),s=srcOf(i)||srcOf(wrapI(i+(fpos<Math.round(fpos)?-1:1)));
+  if(!s)return false;ctx.drawImage(s,0,0,cv.width,cv.height);return true}
 function loadAll(){const rest=LEVELS.filter(l=>!IMG[l.id]);if(rest.length)loadLevel(rest[0],loadAll)}
 function pan(){
   const wrap=$("#wrap");
   if(!portrait.matches){wrap.style.transform="";return}
   const W=wrap.offsetWidth,vw=$("#stage").clientWidth;
-  const fl=Math.floor(fpos),t=fpos-fl,fx=FOCUS[wrapI(fl)]*(1-t)+FOCUS[wrapI(fl+1)]*t;
+  const fx=FOCUS[wrapI(Math.round(fpos))];
   let x=vw/2-fx/2560*W;x=Math.min(0,Math.max(vw-W,x));
   wrap.style.transform=`translate(${x.toFixed(1)}px,-50%)`;
 }
 addEventListener("resize",()=>pan());
 $("#stage").addEventListener("scroll",e=>{e.target.scrollLeft=0;e.target.scrollTop=0});   /* jamais de defilement du cadre (focus, scrollIntoView) */
 function setFrame(f){
-  fpos=f;const fl=Math.floor(f),t=f-fl,i=wrapI(fl),j=wrapI(fl+1);cur_f=t<0.5?i:j;
+  fpos=f;const i=wrapI(Math.round(f));cur_f=i;
   draw();pan();compass();
   if(!FRAMES)return;
-  const A=FRAMES[i],B=FRAMES[j];
+  const A=FRAMES[i];
   for(const n in A){
-    const pa=A[n],pb=B[n],P=(t>0.01&&pb&&pb.length===pa.length)?pa.map((q,k)=>[q[0]+(pb[k][0]-q[0])*t,q[1]+(pb[k][1]-q[1])*t]):(t<0.5?pa:pb||pa);
+    const P=A[n];
     polyEl[n].setAttribute("points",P.map(q=>q[0].toFixed(1)+","+q[1].toFixed(1)).join(" "));
     const c=centroid(P);pinEl[n].setAttribute("x",c[0]);pinEl[n].setAttribute("y",c[1]+13);
   }
@@ -368,12 +366,8 @@ const nLots=L=>L.polys?Object.keys(L.polys[0]).length:0;
 function header(){$("#h-title").textContent=`${PROG.name} · ${LV.nom}`;
   $("#h-sub").textContent=nLots(LV)?(coarse?"Glissez pour tourner · touchez un appartement":"Glissez pour tourner · survolez un appartement"):"Glissez pour tourner · pas d'appartement à cet étage";
   $("#legend").style.display=nLots(LV)?"":"none"}
-function crossfade(){
-  try{const c=document.createElement("canvas");c.id="fade";c.width=cv.width;c.height=cv.height;c.getContext("2d").drawImage(cv,0,0);
-    $("#fade")&&$("#fade").remove();wrap.insertBefore(c,svg);requestAnimationFrame(()=>requestAnimationFrame(()=>{c.style.opacity=0}));setTimeout(()=>c.remove(),600)}catch(e){}
-}
 function setLevel(L,quiet){
-  if(L===LV)return;crossfade();LV=L;FRAMES=L.polys;hideTip();buildPolys();
+  if(L===LV)return;LV=L;FRAMES=L.polys;hideTip();buildPolys();
   if(!quiet)setHash(`etage-${L.id}`);
   document.querySelectorAll("#levels button").forEach(b=>{b.classList.toggle("on",b.dataset.id===L.id);b.setAttribute("aria-pressed",b.dataset.id===L.id)});
   header();const k=(IMG[L.id]||[]).filter(i=>i.complete).length;progress(IMG[L.id]?k:0);

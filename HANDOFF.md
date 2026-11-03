@@ -61,3 +61,9 @@ Mise à jour : dans un clone de `gh-pages`, remplacer le contenu par `git archiv
 - **Confort** : écran de chargement, aide « Glissez pour faire tourner » au premier usage (mémorisée), boussole « RUE » (clic = retour
   face à la rue), fiche : lot précédent / suivant (‹ › et flèches du clavier), flèches sur les vues intérieures, bouton « 🧊 Maquette 3D »
   (`lien_3d` dans la config). Boutons d'en-tête compactés sur téléphone.
+
+## v3.1 (03/11/2026, `main`, tag `v3.1`)
+- **Fondu entre vues supprimé** (il donnait le mal de mer) : la rotation affiche toujours la vue nette la plus proche, polygones
+  de cette vue (plus d'interpolation), recadrage smartphone sans glissement, changement d'étage sans fondu. `fpos` reste
+  fractionnaire pour le glisser, l'inertie et les animations, seul l'affichage est arrondi.
+- Modifié dans `work/template_poilus.html` et reporté à l'identique dans `docs/index.html` (pas de reconstruction : sources sur OneDrive).
